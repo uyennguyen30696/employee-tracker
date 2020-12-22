@@ -16,6 +16,13 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
+
+    console.log(`
+    █▀▀ █▀▄▀█ █▀█ █░░ █▀█ █▄█ █▀▀ █▀▀   ▀█▀ █▀█ ▄▀█ █▀▀ █▄▀ █▀▀ █▀█
+    ██▄ █░▀░█ █▀▀ █▄▄ █▄█ ░█░ ██▄ ██▄   ░█░ █▀▄ █▀█ █▄▄ █░█ ██▄ █▀▄`);
+
+    console.log('\n');
+
     init();
 });
 
@@ -28,6 +35,8 @@ const init = async () => {
         }
     ]).then(resp => {
         console.log("Hello " + `${resp.name}` + "!");
+        console.log(`( ͡♥ ͜ʖ ͡♥)`);
+        console.log('\n');
     });
 
     promptAction();
@@ -41,20 +50,30 @@ async function promptAction() {
             message: 'What would you like to do?',
             choices: [
                 'View all employees',
+                'View list of departments',
+                'View list of roles',
                 'View all employees by department',
                 'View all employees by role',
                 'View all employees by manager',
                 'Add employee',
                 'Remove employee',
                 'Update employee',
-                'Update roles',
-                'Update departments',
+                // 'Update roles',
+                // 'Update departments',
                 'Quit'
             ]
         }).then(resAction => {
             switch (resAction.action) {
                 case 'View all employees':
                     viewAllEmployees();
+                    break;
+
+                case 'View list of departments':
+                    viewDepartmentList();
+                    break;
+
+                case 'View list of roles':
+                    viewRoleList();
                     break;
 
                 case 'View all employees by department':
@@ -88,8 +107,26 @@ async function promptAction() {
         });
 };
 
+function viewDepartmentList() {
+    const query = `SELECT * FROM department;`;
+    connection.query(query, function (err, results) {
+        if (err) throw err;
+        console.table(results);
+        promptAction();
+    });
+};
+
+function viewRoleList() {
+    const query = `SELECT id, title FROM roles;`;
+    connection.query(query, function (err, results) {
+        if (err) throw err;
+        console.table(results);
+        promptAction();
+    });
+};
+
 function viewAllEmployees() {
-    let query = `SELECT employees.id AS employees_ID, employees.first_name, employees.last_name, roles.title, roles.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager_name, manager.id AS manager_ID, department.department_name AS department
+    const query = `SELECT employees.id AS employees_ID, employees.first_name, employees.last_name, roles.title, roles.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager_name, manager.id AS manager_ID, department.department_name AS department
     FROM employees
     INNER JOIN roles ON employees.role_id = roles.id
     INNER JOIN department ON roles.department_id = department.id
@@ -103,7 +140,7 @@ function viewAllEmployees() {
 };
 
 function viewByDepartment() {
-    let query = `SELECT department.id AS department_ID, department.department_name AS department, employees.id AS employee_ID , employees.first_name, employees.last_name, roles.title
+    const query = `SELECT department.id AS department_ID, department.department_name AS department, employees.id AS employee_ID , employees.first_name, employees.last_name, roles.title
     FROM employees
     INNER JOIN roles ON employees.role_id = roles.id
     INNER JOIN department ON roles.department_id = department.id
@@ -131,7 +168,7 @@ function viewByDepartment() {
 };
 
 function viewByRole() {
-    let query = `SELECT roles.id AS role_ID, roles.title, employees.id AS employee_ID, employees.first_name, employees.last_name
+    const query = `SELECT roles.id AS role_ID, roles.title, employees.id AS employee_ID, employees.first_name, employees.last_name
     FROM employees
     INNER JOIN roles ON employees.role_id = roles.id
     ORDER BY roles.id;`;
@@ -143,7 +180,7 @@ function viewByRole() {
 };
 
 function viewByManager() {
-    let query = `SELECT manager.id AS manager_ID, CONCAT(manager.first_name, manager.last_name) AS manager_name, employees.id AS employee_ID, employees.first_name, employees.last_name, roles.title
+    const query = `SELECT manager.id AS manager_ID, CONCAT(manager.first_name, manager.last_name) AS manager_name, employees.id AS employee_ID, employees.first_name, employees.last_name, roles.title
     FROM employees
     RIGHT JOIN employees manager ON employees.manager_id = manager.id
     INNER JOIN roles ON employees.role_id = roles.id
@@ -173,10 +210,10 @@ const promptName = () => {
 async function addEmployee() {
     const askName = await promptName();
 
-    let queryRole = `SELECT id, title
+    const queryRole = `SELECT id, title
         FROM roles
         ORDER BY roles.id;`;
-    let queryManager = `SELECT id, first_name, last_name
+    const queryManager = `SELECT id, first_name, last_name
         FROM employees;`;
 
     connection.query(queryRole, function (err, roleResults) {
@@ -198,6 +235,11 @@ async function addEmployee() {
                 name: `${id} ${first_name} ${last_name}`
             })
             );
+            let noManager = {
+                id: null,
+                name: 'None'
+            }
+            addManager.push(noManager);
 
             inquirer.prompt([
                 {
@@ -218,18 +260,18 @@ async function addEmployee() {
                         first_name: askName.add_first_name,
                         last_name: askName.add_last_name,
                         role_id: parseInt(resAdd.add_role),
-                        manager_id: parseInt(resAdd.add_manager)
+                        manager_id: parseInt(resAdd.add_manager) || null
                     },
                     function (err) {
                         if (err) throw err;
                     }
                 )
+
                 console.log('The new employee has been added. Please view the list of all employees again to verify.');
                 viewAllEmployees();
             })
         });
     });
-    // });
 };
 
 function removeEmployee() {
@@ -287,7 +329,7 @@ function updateEmployee() {
                 message: 'Choose the employee\'s information to update:',
                 choices: [
                     'Role',
-                    'Salary',
+                    // 'Salary',
                     'Manager'
                 ]
             }
@@ -297,7 +339,7 @@ function updateEmployee() {
                 connection.query(queryRole, function (err, results) {
                     if (err) throw err;
 
-                    let updateRole = results.map(({ id, title }) =>
+                    let updateEmployeeRole = results.map(({ id, title }) =>
                     ({
                         id: id,
                         name: `${id} ${title}`
@@ -306,16 +348,16 @@ function updateEmployee() {
 
                     inquirer.prompt(
                         {
-                            name: 'update_role',
+                            name: 'update_employee_role',
                             type: 'list',
                             message: 'What is the employee\'s new role?',
-                            choices: updateRole
+                            choices: updateEmployeeRole
                         }
                     ).then(resRole => {
                         connection.query("UPDATE employees SET ? WHERE ?",
                             [
                                 {
-                                    role_id: parseInt(resRole.update_role)
+                                    role_id: parseInt(resRole.update_employee_role)
                                 },
                                 {
                                     id: parseInt(resUpdate.update_employee)
@@ -330,7 +372,9 @@ function updateEmployee() {
                     });
                 });
             }
-
+            // The salary and role are linked together. Updating one of the two will cause the other to be updated too
+            // This feature is for future improvment
+            /*
             else if (resUpdate.update_list === 'Salary') {
                 connection.query(queryRole, function (err, results) {
                     if (err) throw err;
@@ -367,7 +411,7 @@ function updateEmployee() {
                         viewAllEmployees();
                     });
                 });
-            }
+            } */
             else if (resUpdate.update_list === 'Manager') {
                 connection.query(queryEmployee, function (err, results) {
                     if (err) throw err;
@@ -413,4 +457,44 @@ function updateEmployee() {
         });
     });
 };
+// This feature is for future improvement.
+// Everything in the department table and roles table is linked together, so updating just the department name or role title will cause disruption in other columns in the same table.
+/*
+function updateRole() {
+    const queryDelete = `DELETE FROM roles WHERE ?`
+    connection.query('SELECT * FROM roles;', function (err, results) {
+        if (err) throw err;
 
+        inquirer.prompt(
+            {
+                name: 'update_role',
+                type: 'list',
+                message: 'Would you like to add or delete a role?',
+                choices: [
+                    'Add new role',
+                    'Delete a role'
+                ]
+            }
+        ).then(resUpdateRole => {
+
+            if (resUpdateRole === 'Add new role') {
+                connection.query("INSERT INTO roles SET ?",
+                    {
+                        id:
+                        title:
+                    },
+                    function (err) {
+                        if (err) throw err;
+                    });
+            }
+            // else if
+
+            console.log('The chosen employee\'s information has been updated. Please view the list of all employees again to verify.');
+            viewAllEmployees();
+        });
+
+    });
+
+    console.log('The new role has been added. Please view the list of roles to verify.')
+    viewRoleList();
+}; */
