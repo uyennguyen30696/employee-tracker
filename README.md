@@ -2,7 +2,7 @@
 
 ## Description
 
-Check out the demo [here]().
+Check out the demo [here](https://www.youtube.com/watch?v=hNgFcM0vblg&feature=youtu.be).
 
 This is an CLI application that uses node, inquirer, and MySQL to prompt the user for managing options in the employee database, including: 
 
@@ -77,3 +77,5 @@ Visit [fsymbols.com](https://fsymbols.com/ ) for more font styling in the termin
 * Add or delete departments and roles
 
 * View the total utilized budget of a department -- ie the combined salaries of all employees in that department
+
+* Group duplicated rows into one
