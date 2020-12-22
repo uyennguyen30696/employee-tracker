@@ -111,21 +111,23 @@ function viewByDepartment() {
     connection.query(query, function (err, results) {
         if (err) throw err;
         console.table(results);
+        /*
+        // SELECT DISTINCT department FROM employees
 
         // connection.query(`SELECT `)
-        // inquirer.prompt(
-        //     {
-        //         name: 'department_filter',
-        //         type: 'list',
-        //         message: 'Filter by?',
-        //         choices: () => results.map(results => results.department)
-        //     }
-        // ).then(resFilterDepartment => {
-        //     console.table(resFilterDepartment.department_filter);
-        // });
-
-        promptAction();
+        inquirer.prompt(
+            {
+                name: 'department_filter',
+                type: 'list',
+                message: 'Filter by?',
+                choices: () => results.map(results => results.department)
+            }
+        ).then(resFilterDepartment => {
+            console.log(resFilterDepartment)
+            //console.table(resFilterDepartment.department_filter);
+        }); */
     });
+    promptAction();
 };
 
 function viewByRole() {
@@ -171,34 +173,15 @@ const promptName = () => {
 async function addEmployee() {
     const askName = await promptName();
 
-    // let queryDepartment = `SELECT * 
-    //     FROM department;`;
     let queryRole = `SELECT id, title
         FROM roles
         ORDER BY roles.id;`;
     let queryManager = `SELECT id, first_name, last_name
         FROM employees;`;
-    // connection.query(queryDepartment, function (err, departmentResults) {
-    //     if (err) throw err;
-
-    // let departmentArr = [];
-    // departmentResults.forEach(element => {
-    //     departmentArr.push(JSON.stringify(element))
-    // });
-    // let addDepartment = departmentResults.map(({ id, department_name }) =>
-    // ({
-    //     id: id,
-    //     name: `${id} ${department_name}`
-    // })
-    // );
 
     connection.query(queryRole, function (err, roleResults) {
         if (err) throw err;
 
-        // let roleArr = [];
-        // roleResults.forEach(element => {
-        //     roleArr.push(JSON.stringify(element))
-        // });
         let addRole = roleResults.map(({ id, title }) =>
         ({
             id: id,
@@ -209,18 +192,6 @@ async function addEmployee() {
         connection.query(queryManager, function (err, managerResults) {
             if (err) throw err;
 
-            // let managerArr = [];
-            // // managerResults.forEach(element => {
-            // //     managerArr.push(JSON.stringify(element))
-            // // });
-            // function managerChoices() {
-            //     for (var i = 0; i < managerResults.length; i++) {
-            //         managerArr.push(managerResults[i].first_name + ' ' + managerResults[i].last_name);
-            //         // managerArr.push('N/A')
-            //     }
-            //     // return managerArr;
-            // }
-            // managerChoices();
             let addManager = managerResults.map(({ id, first_name, last_name }) =>
             ({
                 id: id,
@@ -229,27 +200,16 @@ async function addEmployee() {
             );
 
             inquirer.prompt([
-                // {
-                //     name: 'add_department',
-                //     type: 'list',
-                //     message: 'Choose a department:',
-                //     // choices: () => departmentResults.map(departmentResults => departmentResults.department_name)
-                //     // choices: departmentArr
-                //     choices: addDepartment
-                // },
                 {
                     name: 'add_role',
                     type: 'list',
                     message: 'What is the employee\'s role?',
-                    // choices: () => roleResults.map(roleResults => roleResults.title)
-                    // choices: roleArr
                     choices: addRole
                 },
                 {
                     name: 'add_manager',
                     type: 'list',
                     message: 'Who is the employee\'s manager?',
-                    // choices: managerArr
                     choices: addManager
                 }
             ]).then(resAdd => {
@@ -418,6 +378,11 @@ function updateEmployee() {
                         name: `${id} ${first_name} ${last_name}`
                     })
                     );
+                    let noManager = {
+                        id: null,
+                        name: 'None'
+                    }
+                    updateManager.push(noManager);
 
                     inquirer.prompt(
                         {
@@ -430,7 +395,7 @@ function updateEmployee() {
                         connection.query("UPDATE employees SET ? WHERE ?",
                             [
                                 {
-                                    manager_ID: parseInt(resManager.update_manager)
+                                    manager_ID: parseInt(resManager.update_manager) || null
                                 },
                                 {
                                     id: parseInt(resUpdate.update_employee)
@@ -448,3 +413,4 @@ function updateEmployee() {
         });
     });
 };
+
