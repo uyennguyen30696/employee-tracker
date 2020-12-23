@@ -8,6 +8,8 @@ This is an CLI application that uses node, inquirer, and MySQL to prompt the use
 
 * View all departments, roles, and employees in a combined table
 
+* View department budget
+
 * View employees sorted by department, roles, or managers
 
 * View the lists of department and roles
