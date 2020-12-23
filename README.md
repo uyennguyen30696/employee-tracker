@@ -76,6 +76,4 @@ Visit [fsymbols.com](https://fsymbols.com/ ) for more font styling in the termin
 
 * Add or delete departments and roles
 
-* View the total utilized budget of a department -- ie the combined salaries of all employees in that department
-
 * Group duplicated rows into one

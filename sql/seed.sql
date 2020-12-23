@@ -30,3 +30,8 @@ RIGHT JOIN employees manager ON employees.manager_id = manager.id
 INNER JOIN roles ON employees.role_id = roles.id
 ORDER BY employees.id;
 
+-- View department budget
+SELECT department.id, department.department_name, sum(roles.salary) AS budget
+FROM department
+INNER JOIN roles ON department.id = roles.department_id
+GROUP BY department.id;

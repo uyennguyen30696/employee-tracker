@@ -51,6 +51,7 @@ async function promptAction() {
             choices: [
                 'View all employees',
                 'View list of departments',
+                'View department budget',
                 'View list of roles',
                 'View all employees by department',
                 'View all employees by role',
@@ -71,6 +72,11 @@ async function promptAction() {
                 case 'View list of departments':
                     viewDepartmentList();
                     break;
+
+                case 'View department budget':
+                    departmentBudget();
+                    break;
+
 
                 case 'View list of roles':
                     viewRoleList();
@@ -116,6 +122,20 @@ function viewDepartmentList() {
     });
 };
 
+function departmentBudget() {
+    const query = `SELECT department.id, department.department_name, sum(roles.salary) AS budget
+    FROM department
+    INNER JOIN roles ON department.id = roles.department_id
+    GROUP BY department.id;`;
+    connection.query(query, function (err, results) {
+        if (err) throw err;
+        console.table(results);
+        console.log(`💰 💰 💰  💰 💰 💰  💰 💰 💰`);
+        console.log('\n');
+        promptAction();
+    });
+};
+
 function viewRoleList() {
     const query = `SELECT id, title FROM roles;`;
     connection.query(query, function (err, results) {
@@ -150,6 +170,7 @@ function viewByDepartment() {
         console.table(results);
         /*
         // SELECT DISTINCT department FROM employees
+        // GROUP_CONCAT
 
         // connection.query(`SELECT `)
         inquirer.prompt(
@@ -372,8 +393,8 @@ function updateEmployee() {
                     });
                 });
             }
-            // The salary and role are linked together. Updating one of the two will cause the other to be updated too
             // This feature is for future improvment
+            // The salary and role are linked together. Updating one of the two will cause the other to be updated too
             /*
             else if (resUpdate.update_list === 'Salary') {
                 connection.query(queryRole, function (err, results) {
