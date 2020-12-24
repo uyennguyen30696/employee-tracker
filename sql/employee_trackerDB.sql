@@ -1,3 +1,4 @@
+-- Remember to change this with our specific credentials
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'yourRootPassword';
 
 DROP DATABASE IF EXISTS employee_trackerDB;
