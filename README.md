@@ -2,7 +2,7 @@
 
 ## Description
 
-Check out the demo [here](https://www.youtube.com/watch?v=hNgFcM0vblg&feature=youtu.be).
+Check out the demo [here](https://www.youtube.com/watch?v=gXqlzYxBIqU).
 
 This is an CLI application that uses node, inquirer, and MySQL to prompt the user for managing options in the employee database, including: 
 
